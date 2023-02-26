@@ -1,0 +1,52 @@
+<svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg">
+	<!-- #region head node -->
+	<!-- previous line pointing to null -->
+	<path fill="none" stroke="black" d="
+			M40,80
+			C20,80 40,140
+			20,140
+		" />
+	<!-- null circle -->
+	<circle height="5" width="5" cx="15" cy="140" r="5" />
+	<text font-size="10" font-family="consolas" x="5" y="155">null</text>
+	<rect width="100" height="100" x="50" y="10" rx="8" fill="#ced4da" stroke="black" stroke-width="2" />
+	<!-- next arrow line -->
+	<path fill="none" stroke="black" d="
+			M150,40
+			S250,60
+			350,40
+		" />
+	<!-- next arrow -->
+	<polygon fill="black" stroke="black" points="350,40 325,35 330,55" />
+	<text x="80" y="80" font-size="64" font-family="consolas">H</text>
+	<!-- next circle -->
+	<circle height="10" width="10" cx="50" cy="80" r="10" stroke="black" fill="#868e96" /> 
+	<!-- previous circle -->
+	<circle height="10" width="10" cx="150" cy="40" r="10" stroke="black" fill="#868e96" />
+	<!-- #endregion -->
+	<!-- #region end node -->
+	<rect width="100" height="100" x="350" y="10" rx="8" fill="#ced4da" stroke="black" stroke-width="2" />
+	<!-- previous arrow line -->
+	<path fill="none" stroke="black" d="
+			M150,80
+			S250,100
+			350,80
+		" />
+	<!-- previous arrow -->
+	<polygon fill="black" stroke="black" points="150,80 175,75 170,95" />
+	<text x="380" y="80" font-size="64" font-family="consolas">E</text>
+	<!-- next circle -->
+	<circle height="10" width="10" cx="350" cy="80" r="10" stroke="black" fill="#868e96" />
+	<!-- previous circle -->
+	<circle height="10" width="10" cx="450" cy="40" r="10" stroke="black" fill="#868e96" />
+	<!-- next line pointing to null -->
+	<path fill="none" stroke="black" d="
+			M460,40
+			C500,40 450,140
+			500,140
+		" />
+	<!-- null circle -->
+	<circle height="5" width="5" cx="500" cy="140" r="5" />
+	<text x="490" y="155" font-size="10" font-family="consolas">null</text>
+	<!-- #endregion -->
+</svg>
