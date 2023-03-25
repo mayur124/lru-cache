@@ -1,216 +1,163 @@
-import { FC } from "react";
-import { COLORS } from "./colors";
-import {
-  TConnector,
-  TRectangle,
-  TSvgDiagram,
-  TSvgNode,
-  TXPosition,
-} from "./svg-diagram.type";
+import { useSpringRef, useTransition, animated } from "@react-spring/web";
+import { FC, useEffect, useRef, useState } from "react";
+import { TNode } from "../../types";
+import { SVG_CONSTANTS as C } from "./constants";
+import { Arrows, EndNode, HeadNode, Rectangle } from "./Shapes";
+import { OPERATIONS, TSvgDiagram, TSvgNodeItem } from "./svg-diagram.type";
 
-const RECTANGLE_SIZE = 50,
-  ARROW_WIDTH = 70,
-  CONNECTOR_SIZE = 3,
-  TOP_CONNECTOR_Y = 15,
-  BOTTOM_CONNECTOR_Y = 35,
-  ANCHOR_BUFFER = 8,
-  TOP_ANCHOR_Y = TOP_CONNECTOR_Y + ANCHOR_BUFFER,
-  BOTTOM_ANCHOR_Y = BOTTOM_CONNECTOR_Y + ANCHOR_BUFFER;
+const nodeList: TSvgNodeItem[] = [
+  { isHeadNode: true, value: "H", address: "H", x: 70 },
+  { isEndNode: true, value: "E", address: "E", x: 190 },
+];
 
-export const SVGDiagram: FC<TSvgDiagram> = ({ nodes }) => {
-  const zoomX =
-    nodes.reduce(
-      (prev, curr) =>
-        curr.next != null || curr.prev != null
-          ? (prev += RECTANGLE_SIZE + ARROW_WIDTH)
-          : prev,
-      0
-    ) - 8;
+export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
+  const [zoomX, setZoomX] = useState((C.RECTANGLE_SIZE + C.ARROW_WIDTH) * 2);
+  const [zoomY, setZoomY] = useState(80);
+  const [svgNodes, setSvgNodes] = useState<TSvgNodeItem[]>(nodeList);
+  const [showArrows, setShowArrows] = useState(true);
+  const [operation, setOperation] = useState<OPERATIONS | null>(null);
+  const newValueRef = useRef(10);
+
+  const transRef = useSpringRef();
+  const transitions = useTransition(svgNodes, {
+    ref: transRef,
+    from: { y: C.RECTANGLE_SIZE + C.RECTANGLE_SIZE / 4, opacity: 0 },
+    enter: {
+      y: 0,
+      opacity: 1,
+    },
+    leave: { y: C.RECTANGLE_SIZE + C.RECTANGLE_SIZE / 4, opacity: 0 },
+    config: {
+      mass: 0.25,
+      tension: 100,
+      friction: 15,
+    },
+  });
+
+  const addNewNode = (node: TNode) => {
+    setSvgNodes((nodes) => {
+      const newNode = {
+        value: node.value,
+        address: node.address,
+        x: 0,
+      };
+      nodes = [nodes[0], newNode, ...nodes.slice(1)];
+      // prettier-ignore
+      for (let index = 1; index < nodes.length; index++) {
+        nodes[index].x = nodes[index - 1].x + C.RECTANGLE_SIZE + C.ARROW_WIDTH;
+      }
+      return nodes;
+    });
+  };
+
+  const removeNode = () => {
+    setSvgNodes((nodes) => {
+      nodes.splice(nodes.length - 2, 1);
+      // prettier-ignore
+      for (let index = 1; index < nodes.length; index++) {
+        nodes[index].x = nodes[index - 1].x + C.RECTANGLE_SIZE + C.ARROW_WIDTH;
+      }
+      return [...nodes];
+    });
+  };
+
+  useEffect(() => {
+    setZoomX(
+      svgNodes.reduce(
+        (prev, curr) =>
+          !curr.isHeadNode || !curr.isEndNode
+            ? (prev += C.RECTANGLE_SIZE + C.ARROW_WIDTH)
+            : prev,
+        0
+      ) - 8
+    );
+    transRef.start();
+  }, [svgNodes]);
+
+  useEffect(() => {
+    if (showArrows) {
+      switch (operation) {
+        case OPERATIONS.ADD:
+          addNewNode({
+            address: "0x00a",
+            value: newValueRef.current++,
+            prev: { address: "", value: 0, prev: null, next: null },
+            next: { address: "", value: 1, prev: null, next: null },
+          });
+          break;
+        case OPERATIONS.REMOVE:
+          removeNode();
+          break;
+        case OPERATIONS.SWAP:
+          break;
+      }
+    }
+  }, [showArrows, operation]);
 
   return (
-    <div className="h-[calc(150/16*1rem)] my-2">
-      {/* <svg viewBox={`42 0 ${zoomX} 80`} className="h-full m-auto"> */}
-      <svg viewBox={`42 0 ${zoomX} 80`} className="h-full w-full m-auto">
-        {nodes.map((node, index) => {
-          return node.prev == null ? (
-            <HeadNode key={node.address} />
-          ) : node.next == null ? (
-            <EndNode
-              key={node.address}
-              xPostion={index * (RECTANGLE_SIZE + ARROW_WIDTH)}
-            />
-          ) : (
-            <Node
-              key={node.address}
-              address={node.address}
-              value={node.value}
-              xPostion={index * (RECTANGLE_SIZE + ARROW_WIDTH)}
-            />
-          );
-        })}
+    <div className="h-[calc(300/16*1rem)] my-2">
+      {/* <svg viewBox={`42 0 ${zoomX} ${zoomY}`} className="h-full w-full m-auto"> */}
+      <svg viewBox={`42 0 ${zoomX} 150`} className="h-full w-full m-auto">
+        <>
+          {transitions((style, node, _) => {
+            return node.isHeadNode ? (
+              <animated.g style={style}>
+                <HeadNode />
+              </animated.g>
+            ) : node.isEndNode ? (
+              <animated.g style={style}>
+                <EndNode xPostion={node.x} />
+              </animated.g>
+            ) : (
+              <animated.g style={style}>
+                <Rectangle
+                  address={node.address}
+                  text={node.value}
+                  xPostion={node.x}
+                />
+              </animated.g>
+            );
+          })}
+          {svgNodes.map((node, index) =>
+            node.isHeadNode ? null : (
+              <Arrows
+                key={node.value}
+                // prettier-ignore
+                showArrows={
+                  (index === 1 && operation === OPERATIONS.ADD) ||
+                  (
+                    (index === svgNodes.length - 2 || index === svgNodes.length - 1) && 
+                    operation === OPERATIONS.REMOVE
+                  ) ? showArrows
+                    : true
+                }
+                xPostion={index * (C.RECTANGLE_SIZE + C.ARROW_WIDTH)}
+                onArrowHidden={() => setShowArrows(true)}
+              />
+            )
+          )}
+        </>
       </svg>
+      <button
+        type="button"
+        className="mt-4"
+        onClick={() => {
+          setShowArrows(false);
+          setOperation(OPERATIONS.ADD);
+        }}
+      >
+        Add Node
+      </button>
+      <button
+        type="button"
+        className="mt-4 ml-2"
+        onClick={() => {
+          setShowArrows(false);
+          setOperation(OPERATIONS.REMOVE);
+        }}
+      >
+        Remove Node
+      </button>
     </div>
   );
 };
-
-const Rectangle: FC<TRectangle> = ({ xPostion, text, address }) => (
-  <g>
-    <rect
-      width={RECTANGLE_SIZE}
-      height={RECTANGLE_SIZE}
-      rx={4}
-      strokeWidth={0.5}
-      stroke={COLORS.STROKE}
-      fill={COLORS.RECTANGLE_BG}
-      x={xPostion}
-      y={1}
-      style={{
-        filter: `drop-shadow(0 2px 4px ${COLORS.RECTANGLE_SHADOW})`,
-      }}
-    />
-    <Connector
-      xPostion={xPostion + RECTANGLE_SIZE}
-      yPosition={TOP_CONNECTOR_Y}
-    />
-    <Connector xPostion={xPostion} yPosition={BOTTOM_CONNECTOR_Y} />
-    <text
-      textAnchor="middle"
-      dominantBaseline="middle"
-      fontSize={20}
-      fontWeight={400}
-      x={xPostion + RECTANGLE_SIZE / 2}
-      y={RECTANGLE_SIZE / 2}
-    >
-      {text}
-    </text>
-    {address ? (
-      <text
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontSize={8}
-        fontFamily="consolas"
-        x={xPostion + RECTANGLE_SIZE / 2}
-        y={RECTANGLE_SIZE - 5}
-      >
-        {address}
-      </text>
-    ) : null}
-  </g>
-);
-
-const NullText: FC<TXPosition> = ({ xPostion }) => (
-  <text
-    x={xPostion}
-    y={RECTANGLE_SIZE + 30}
-    fontSize={10}
-    fontFamily="consolas"
-  >
-    null
-  </text>
-);
-
-const HeadNode = () => (
-  <g>
-    <Rectangle text="H" xPostion={ARROW_WIDTH} />
-    <path
-      fill="none"
-      stroke={COLORS.STROKE}
-      d={`
-        M45,${BOTTOM_CONNECTOR_Y + 30}
-        C${ARROW_WIDTH},${BOTTOM_CONNECTOR_Y + 30} 45,${BOTTOM_CONNECTOR_Y}
-        ${ARROW_WIDTH},${BOTTOM_CONNECTOR_Y}
-      `}
-    />
-    <Connector xPostion={45} yPosition={BOTTOM_CONNECTOR_Y + 30} />
-    <NullText xPostion={42} />
-  </g>
-);
-
-const Arrows: FC<TXPosition> = ({ xPostion }) => (
-  <>
-    {/* NextArrow [top] */}
-    <path
-      fill="none"
-      stroke={COLORS.STROKE}
-      // prettier-ignore
-      d={`
-        M${xPostion},${TOP_CONNECTOR_Y}
-        C${xPostion + 10},${TOP_ANCHOR_Y} ${xPostion + ARROW_WIDTH - 10},${TOP_ANCHOR_Y}
-        ${xPostion + ARROW_WIDTH},${TOP_CONNECTOR_Y}
-      `}
-    />
-    <polygon
-      fill={COLORS.CONNECTOR_BG}
-      stroke={COLORS.CONNECTOR_BG}
-      points={`
-        ${xPostion + ARROW_WIDTH - 1},${TOP_CONNECTOR_Y + 0.5} 
-        ${xPostion + ARROW_WIDTH - 10},${TOP_CONNECTOR_Y} 
-        ${xPostion + ARROW_WIDTH - 7.5},${TOP_CONNECTOR_Y + 7}
-      `}
-    />
-    {/* PrevArrow [bottom] */}
-    <path
-      fill="none"
-      stroke={COLORS.STROKE}
-      // prettier-ignore
-      d={`
-        M${xPostion},${BOTTOM_CONNECTOR_Y}
-        C${xPostion + 10},${BOTTOM_ANCHOR_Y} ${xPostion + ARROW_WIDTH - 10},${BOTTOM_ANCHOR_Y}
-        ${xPostion + ARROW_WIDTH},${BOTTOM_CONNECTOR_Y}
-      `}
-    />
-    <polygon
-      fill={COLORS.CONNECTOR_BG}
-      stroke={COLORS.CONNECTOR_BG}
-      points={`
-        ${xPostion + 1},${BOTTOM_CONNECTOR_Y + 0.5} 
-        ${xPostion + 10},${BOTTOM_CONNECTOR_Y} 
-        ${xPostion + 7.5},${BOTTOM_CONNECTOR_Y + 7}
-      `}
-    />
-  </>
-);
-
-const Connector: FC<TConnector> = ({ xPostion, yPosition }) => (
-  <circle
-    height={CONNECTOR_SIZE}
-    width={CONNECTOR_SIZE}
-    r={CONNECTOR_SIZE}
-    cx={xPostion}
-    cy={yPosition}
-    fill={COLORS.CONNECTOR_BG}
-  />
-);
-
-const EndNode: FC<TXPosition> = ({ xPostion }) => (
-  <g>
-    <Arrows xPostion={xPostion} />
-    <Rectangle text="E" xPostion={xPostion + ARROW_WIDTH} />
-    <path
-      fill="none"
-      stroke={COLORS.STROKE}
-      // prettier-ignore
-      d={`
-        M${xPostion + RECTANGLE_SIZE + ARROW_WIDTH},${TOP_CONNECTOR_Y}
-        C${xPostion + RECTANGLE_SIZE + ARROW_WIDTH + 30},${TOP_CONNECTOR_Y} ${xPostion + RECTANGLE_SIZE + ARROW_WIDTH},${BOTTOM_CONNECTOR_Y + 30}
-        ${xPostion + RECTANGLE_SIZE + ARROW_WIDTH + 30},${BOTTOM_CONNECTOR_Y + 30}
-      `}
-    />
-    <Connector
-      xPostion={xPostion + RECTANGLE_SIZE + ARROW_WIDTH + 30}
-      yPosition={BOTTOM_CONNECTOR_Y + 30}
-    />
-    <NullText xPostion={xPostion + RECTANGLE_SIZE + ARROW_WIDTH + 12} />
-  </g>
-);
-
-const Node: FC<TSvgNode> = ({ address, value, xPostion }) => (
-  <g>
-    <Rectangle
-      text={value}
-      address={address}
-      xPostion={xPostion + ARROW_WIDTH}
-    />
-    <Arrows xPostion={xPostion} />
-  </g>
-);

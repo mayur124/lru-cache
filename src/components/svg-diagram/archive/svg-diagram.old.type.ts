@@ -1,11 +1,12 @@
-import { TNode } from "../../types";
+import { CSSProperties } from "react";
+import { TNode } from "../../../types";
 
 export type TSvgNodeItem = {
   isHeadNode?: boolean;
   isEndNode?: boolean;
   value: string | number;
-  address: string;
-  x: number;
+  address?: string;
+  styles?: CSSProperties;
 };
 
 export type TSvgDiagram = {
@@ -17,11 +18,15 @@ export type TXPosition = {
 };
 
 export type TArrowAnimations = {
-  showArrows: boolean;
-  onArrowHidden: () => void;
+  hideArrowPointer: boolean;
+  shiftArrowToBottom: boolean;
+  shiftRightPathToRight: boolean;
 };
 
-export type TEndNode = TXPosition;
+export type TEndNode = TXPosition &
+  Partial<TArrowAnimations> & {
+    onEndNodeMoveComplete: () => void;
+  };
 
 type TYPosition = {
   yPosition: number;
@@ -44,9 +49,3 @@ export type TNewNode = Pick<TSvgNode, "address" | "value"> & {
 };
 
 export type TConnector = TXPosition & TYPosition;
-
-export enum OPERATIONS {
-  ADD = "add",
-  SWAP = "swap",
-  REMOVE = "remove",
-}

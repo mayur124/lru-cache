@@ -9,11 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "lodash.uniqueid": "^4.0.1",
+    "@react-spring/web": "^9.7.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@react-spring/types": "^9.7.0",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
     "@vitejs/plugin-react": "^3.1.0",
