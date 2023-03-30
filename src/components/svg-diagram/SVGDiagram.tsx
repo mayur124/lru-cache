@@ -1,6 +1,5 @@
 import { useSpringRef, useTransition, animated } from "@react-spring/web";
 import { FC, useEffect, useRef, useState } from "react";
-import { TNode } from "../../types";
 import { SVG_CONSTANTS as C } from "./constants";
 import { Arrows, EndNode, HeadNode, Rectangle } from "./Shapes";
 import { OPERATIONS, TSvgDiagram, TSvgNodeItem } from "./svg-diagram.type";
@@ -12,10 +11,10 @@ const nodeList: TSvgNodeItem[] = [
 
 export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
   const [zoomX, setZoomX] = useState((C.RECTANGLE_SIZE + C.ARROW_WIDTH) * 2);
-  const [zoomY, setZoomY] = useState(80);
   const [svgNodes, setSvgNodes] = useState<TSvgNodeItem[]>(nodeList);
   const [showArrows, setShowArrows] = useState(true);
-  const [operation, setOperation] = useState<OPERATIONS | null>(null);
+  const operation = useRef<OPERATIONS | null>(null);
+  const targetValue = useRef<number | null>(null);
   const newValueRef = useRef(10);
 
   const transRef = useSpringRef();
@@ -34,15 +33,9 @@ export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
     },
   });
 
-  const addNewNode = (node: TNode) => {
+  const addNewNode = (node: TSvgNodeItem) => {
     setSvgNodes((nodes) => {
-      const newNode = {
-        value: node.value,
-        address: node.address,
-        x: 0,
-      };
-      nodes = [nodes[0], newNode, ...nodes.slice(1)];
-      // prettier-ignore
+      nodes = [nodes[0], node, ...nodes.slice(1)];
       for (let index = 1; index < nodes.length; index++) {
         nodes[index].x = nodes[index - 1].x + C.RECTANGLE_SIZE + C.ARROW_WIDTH;
       }
@@ -53,10 +46,30 @@ export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
   const removeNode = () => {
     setSvgNodes((nodes) => {
       nodes.splice(nodes.length - 2, 1);
-      // prettier-ignore
       for (let index = 1; index < nodes.length; index++) {
         nodes[index].x = nodes[index - 1].x + C.RECTANGLE_SIZE + C.ARROW_WIDTH;
       }
+      return [...nodes];
+    });
+  };
+
+  const swapNode = () => {
+    setSvgNodes((nodes) => {
+      const targetNodeIndex = nodes.findIndex(
+        (node) => +node.value === targetValue.current
+      );
+      const tempNode = { ...nodes[1] };
+      nodes[1] = { ...nodes[targetNodeIndex] };
+      nodes[targetNodeIndex] = tempNode;
+      for (let index = 1; index < nodes.length; index++) {
+        nodes[index].x = nodes[index - 1].x + C.RECTANGLE_SIZE + C.ARROW_WIDTH;
+      }
+      return [...nodes];
+    });
+  };
+
+  const replaceValue = () => {
+    setSvgNodes((nodes) => {
       return [...nodes];
     });
   };
@@ -76,74 +89,88 @@ export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
 
   useEffect(() => {
     if (showArrows) {
-      switch (operation) {
+      switch (operation.current) {
         case OPERATIONS.ADD:
           addNewNode({
             address: "0x00a",
             value: newValueRef.current++,
-            prev: { address: "", value: 0, prev: null, next: null },
-            next: { address: "", value: 1, prev: null, next: null },
+            x: 0,
           });
           break;
         case OPERATIONS.REMOVE:
           removeNode();
           break;
         case OPERATIONS.SWAP:
+          swapNode();
+          break;
+        case OPERATIONS.REPLACE:
+          replaceValue();
           break;
       }
     }
-  }, [showArrows, operation]);
+  }, [showArrows]);
 
   return (
-    <div className="h-[calc(300/16*1rem)] my-2">
-      {/* <svg viewBox={`42 0 ${zoomX} ${zoomY}`} className="h-full w-full m-auto"> */}
-      <svg viewBox={`42 0 ${zoomX} 150`} className="h-full w-full m-auto">
-        <>
-          {transitions((style, node, _) => {
-            return node.isHeadNode ? (
-              <animated.g style={style}>
-                <HeadNode />
-              </animated.g>
-            ) : node.isEndNode ? (
-              <animated.g style={style}>
-                <EndNode xPostion={node.x} />
-              </animated.g>
-            ) : (
-              <animated.g style={style}>
-                <Rectangle
-                  address={node.address}
-                  text={node.value}
-                  xPostion={node.x}
+    <>
+      <p className="text-center font-medium">
+        <span className="relative cursor-help after:absolute after:border-[2px] after:border-b-0 after:left-0 after:right-0 after:-bottom-1 after:border-blue-800 after:border-dashed before:content-['Capacity_of_Caching_Items'] before:absolute before:opacity-0 hover:before:opacity-100 before:rounded before:font-normal before:whitespace-nowrap before:mt-2 before:px-2 before:py-0.5 before:bg-slate-100 before:border before:border-slate-300 before:left-0 before:top-full before:text-xs before:h-6 before:transition-opacity before:tracking-wide before:shadow-md">Cache Size</span>: 2
+      </p>
+      <div className="h-[calc(150/16*1rem)] mt-3 mb-2">
+        <svg viewBox={`42 0 ${zoomX} 100`} className="h-full w-full m-auto">
+          <>
+            {transitions((style, node, _) => {
+              return node.isHeadNode ? (
+                <animated.g style={style}>
+                  <HeadNode />
+                </animated.g>
+              ) : node.isEndNode ? (
+                <animated.g style={style}>
+                  <EndNode xPostion={node.x} />
+                </animated.g>
+              ) : (
+                <animated.g style={style}>
+                  <Rectangle
+                    address={node.address}
+                    text={node.value}
+                    xPostion={node.x}
+                  />
+                </animated.g>
+              );
+            })}
+            {svgNodes.map((node, index) =>
+              node.isHeadNode ? null : (
+                <Arrows
+                  key={node.value}
+                  // prettier-ignore
+                  showArrows={
+                    (operation.current === OPERATIONS.ADD && index === 1) ||
+                    (
+                      operation.current === OPERATIONS.REMOVE &&
+                      (index === svgNodes.length - 2 || index === svgNodes.length - 1)
+                    ) ||
+                    (
+                      operation.current === OPERATIONS.SWAP &&
+                      (
+                        node.value === targetValue.current || 
+                        index === 1 || index === 2 || index === (svgNodes.findIndex(n => n.value === targetValue.current) + 1)
+                      )
+                    ) ? showArrows
+                      : true
+                  }
+                  xPostion={index * (C.RECTANGLE_SIZE + C.ARROW_WIDTH)}
+                  onArrowHidden={() => setShowArrows(true)}
                 />
-              </animated.g>
-            );
-          })}
-          {svgNodes.map((node, index) =>
-            node.isHeadNode ? null : (
-              <Arrows
-                key={node.value}
-                // prettier-ignore
-                showArrows={
-                  (index === 1 && operation === OPERATIONS.ADD) ||
-                  (
-                    (index === svgNodes.length - 2 || index === svgNodes.length - 1) && 
-                    operation === OPERATIONS.REMOVE
-                  ) ? showArrows
-                    : true
-                }
-                xPostion={index * (C.RECTANGLE_SIZE + C.ARROW_WIDTH)}
-                onArrowHidden={() => setShowArrows(true)}
-              />
-            )
-          )}
-        </>
-      </svg>
-      <button
+              )
+            )}
+          </>
+        </svg>
+      </div>
+      {/* <button
         type="button"
         className="mt-4"
         onClick={() => {
+          operation.current = OPERATIONS.ADD;
           setShowArrows(false);
-          setOperation(OPERATIONS.ADD);
         }}
       >
         Add Node
@@ -152,12 +179,23 @@ export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
         type="button"
         className="mt-4 ml-2"
         onClick={() => {
+          operation.current = OPERATIONS.REMOVE;
           setShowArrows(false);
-          setOperation(OPERATIONS.REMOVE);
         }}
       >
         Remove Node
       </button>
-    </div>
+      <button
+        type="button"
+        className="mt-4 ml-2"
+        onClick={() => {
+          operation.current = OPERATIONS.SWAP;
+          targetValue.current = 11;
+          setShowArrows(false);
+        }}
+      >
+        Swap Node
+      </button> */}
+    </>
   );
 };

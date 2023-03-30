@@ -9,7 +9,7 @@ export type TSvgNodeItem = {
 };
 
 export type TSvgDiagram = {
-  node?: TNode;
+  node?: TSvgNodeItem;
 };
 
 export type TXPosition = {
@@ -33,20 +33,11 @@ export type TRectangle = TXPosition &
     address?: string;
   };
 
-export type TSvgNode = Pick<TNode, "address" | "value"> &
-  TXPosition &
-  Partial<TYPosition>;
-
-export type TNewNode = Pick<TSvgNode, "address" | "value"> & {
-  moveUp: boolean;
-  onFirstAnimComplete: () => void;
-  onMoveUpAnimComplete: () => void;
-};
-
 export type TConnector = TXPosition & TYPosition;
 
 export enum OPERATIONS {
   ADD = "add",
   SWAP = "swap",
   REMOVE = "remove",
+  REPLACE = "replace",
 }

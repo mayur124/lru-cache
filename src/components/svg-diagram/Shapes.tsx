@@ -6,9 +6,7 @@ import {
   TArrowAnimations,
   TConnector,
   TEndNode,
-  TNewNode,
   TRectangle,
-  TSvgNode,
   TXPosition,
 } from "./svg-diagram.type";
 
