@@ -111,7 +111,7 @@ export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
   }, [showArrows]);
 
   return (
-    <>
+    <div>
       <p className="text-center font-medium">
         <span className="relative cursor-help after:absolute after:border-[2px] after:border-b-0 after:left-0 after:right-0 after:-bottom-1 after:border-blue-800 after:border-dashed before:content-['Capacity_of_Caching_Items'] before:absolute before:opacity-0 hover:before:opacity-100 before:rounded before:font-normal before:whitespace-nowrap before:mt-2 before:px-2 before:py-0.5 before:bg-slate-100 before:border before:border-slate-300 before:left-0 before:top-full before:text-xs before:h-6 before:transition-opacity before:tracking-wide before:shadow-md">Cache Size</span>: 2
       </p>
@@ -196,6 +196,6 @@ export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
       >
         Swap Node
       </button> */}
-    </>
+    </div>
   );
 };
