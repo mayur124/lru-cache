@@ -9,45 +9,32 @@ import {
 } from "../../components";
 
 export const MainPage = () => {
-  const [buttonState, setButtonState] = useState(false); // true - play, false - pause
-
   return (
-    <main className="max-w-7xl mx-auto px-2 py-3 flex flex-col h-full">
+    <main className="max-w-2xl mx-auto px-2 py-3 flex flex-col h-full">
       <Header />
-      <section className="grow h-full flex flex-col">
+      <section className="grow flex flex-col">
         <SVGDiagram />
-        <div className="flex flex-col grow">
-          <div>
-            <button
-              type="button"
-              onClick={() => setButtonState((state) => !state)}
-              className="p-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors"
-            >
-              {buttonState ? "Pause" : "Play"}
-            </button>
+        <div className="-mx-1.5 flex grow [&>div]:grow [&>div]:mx-1.5 [&>div]:basis-1/2 [&>div]:max-w-[50%]">
+          <div className="flex flex-col gap-3">
+            {/* <div className="grow"> */}
+            <div>
+              <Operations />
+            </div>
+            {/* <div className="grow-[2]"> */}
+            <div>
+              <Map />
+            </div>
           </div>
-          <div className="-mx-2 mt-2 flex grow [&>div]:grow [&>div]:shrink-0">
-            <div className="mx-2 basis-[calc(3/12*100%)] max-w-[calc(3/12*100%)]">
-              <Card>
-                <Algorithm />
-              </Card>
-            </div>
-            <div className="mx-2 flex">
-              <Card>
-                <div>
-                  <Operations />
-                </div>
-                <div>
-                  <Map />
-                </div>
-              </Card>
-            </div>
+          <div>
+            <Card>
+              <Algorithm />
+            </Card>
           </div>
         </div>
       </section>
       <footer className="mt-2">
         <p className="text-center text-xs">
-          Made by{" "}
+          Crafted by{" "}
           <a
             href="https://www.linkedin.com/in/mayur-chawda/"
             target="_blank"

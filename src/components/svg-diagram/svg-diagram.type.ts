@@ -37,7 +37,7 @@ export type TConnector = TXPosition & TYPosition;
 
 export enum OPERATIONS {
   ADD = "add",
-  SWAP = "swap",
+  MOVE_AFTER_HEAD = "move_after_head",
   REMOVE = "remove",
   REPLACE = "replace",
 }

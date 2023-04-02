@@ -1,5 +1,7 @@
+import { CardHeader } from "../common";
+
 export const Algorithm = () => (
   <>
-    <h3 className="border-b">Algorithm</h3>
+    <CardHeader>Algorithm</CardHeader>
   </>
 );

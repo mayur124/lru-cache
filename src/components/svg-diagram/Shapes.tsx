@@ -67,17 +67,6 @@ export const Rectangle: FC<TRectangle> = ({
   </>
 );
 
-const NullText: FC<TXPosition> = ({ xPostion }) => (
-  <text
-    x={xPostion}
-    y={C.RECTANGLE_SIZE + 30}
-    fontSize={10}
-    fontFamily="consolas"
-  >
-    null
-  </text>
-);
-
 export const Arrows: FC<TXPosition & Partial<TArrowAnimations>> = ({
   xPostion,
   showArrows,
@@ -210,7 +199,6 @@ export const HeadNode: FC = () => (
       `}
     />
     <Connector xPostion={45} yPosition={C.BOTTOM_CONNECTOR_Y + 30} />
-    <NullText xPostion={42} />
   </>
 );
 
@@ -232,7 +220,6 @@ export const EndNode: FC<TEndNode> = ({ xPostion }) => {
         xPostion={xPostion + C.RECTANGLE_SIZE + 30}
         yPosition={C.BOTTOM_CONNECTOR_Y + 30}
       />
-      <NullText xPostion={xPostion + C.RECTANGLE_SIZE + 12} />
     </>
   );
 };
