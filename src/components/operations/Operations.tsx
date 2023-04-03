@@ -15,12 +15,12 @@ export const Operations = () => (
           <option value="get">get</option>
         </select>
       </div>
-      <div className="flex flex-wrap -mx-1 [&>div]:mt-0.5 [&>div]:flex-[1_1_calc((160-8)/16*1rem)]">
-        <div className="pr-1">
+      <div className="flex flex-wrap -mx-1 [&>div]:mx-1 [&>div]:mt-0.5 [&>div]:flex-[1_1_calc((160_-_6_-_8)/16*1rem)]">
+        <div>
           <label htmlFor="key">Key</label>
           <input type="number" id="key" required />
         </div>
-        <div className="pl-1">
+        <div>
           <label htmlFor="value">Value</label>
           <input type="number" id="value" min={1} max={99} required />
         </div>
