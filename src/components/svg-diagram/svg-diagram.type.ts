@@ -1,8 +1,8 @@
-import { TNode } from "../../types";
-
 export type TSvgNodeItem = {
+  id: string;
   isHeadNode?: boolean;
   isEndNode?: boolean;
+  key: string | number;
   value: string | number;
   address: string;
   x: number;

@@ -33,6 +33,9 @@ export const Map = () => (
             <td>&lt;3, 30&gt;</td>
             <td>0x0300</td>
           </tr>
+          <tr>
+            <td colSpan={2}>Map is empty.</td>
+          </tr>
         </tbody>
       </table>
     </div>

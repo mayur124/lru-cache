@@ -5,8 +5,22 @@ import { Arrows, EndNode, HeadNode, Rectangle } from "./Shapes";
 import { OPERATIONS, TSvgDiagram, TSvgNodeItem } from "./svg-diagram.type";
 
 const nodeList: TSvgNodeItem[] = [
-  { isHeadNode: true, value: "H", address: "H", x: 70 },
-  { isEndNode: true, value: "E", address: "E", x: 190 },
+  {
+    id: crypto.randomUUID(),
+    isHeadNode: true,
+    key: "H",
+    value: "H",
+    address: "H",
+    x: 70,
+  },
+  {
+    id: crypto.randomUUID(),
+    isEndNode: true,
+    key: "E",
+    value: "E",
+    address: "E",
+    x: 190,
+  },
 ];
 
 export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
@@ -85,14 +99,16 @@ export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
       ) - 8
     );
     transRef.start();
-  }, [svgNodes]);
+  }, [svgNodes, transRef]);
 
   useEffect(() => {
     if (showArrows) {
       switch (operation.current) {
         case OPERATIONS.ADD:
           addNewNode({
+            id: crypto.randomUUID(),
             address: "0x00a",
+            key: 1,
             value: newValueRef.current++,
             x: 0,
           });
@@ -137,7 +153,7 @@ export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
             {svgNodes.map((node, index) =>
               node.isHeadNode ? null : (
                 <Arrows
-                  key={node.value}
+                  key={node.id}
                   // prettier-ignore
                   showArrows={
                     (operation.current === OPERATIONS.ADD && index === 1) ||

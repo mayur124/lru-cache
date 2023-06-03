@@ -1,11 +1,10 @@
-import { useState } from "react";
 import {
-  SVGDiagram,
-  Header,
   Algorithm,
-  Operations,
-  Map,
   Card,
+  Header,
+  Map,
+  Operations,
+  SVGDiagram,
 } from "../../components";
 
 export const MainPage = () => {
@@ -14,18 +13,16 @@ export const MainPage = () => {
       <Header />
       <section className="grow flex flex-col">
         <SVGDiagram />
-        <div className="-mx-1.5 flex grow [&>div]:grow [&>div]:mx-1.5 [&>div]:basis-1/2 [&>div]:max-w-[50%]">
-          <div className="flex flex-col gap-3">
-            {/* <div className="grow"> */}
+        <div className="-mx-1.5 flex [&>div]:grow [&>div]:mx-1.5">
+          <div className="flex flex-col gap-3 basis-[calc(5/12*100%)] max-w-[calc(5/12*100%)]">
             <div>
               <Operations />
             </div>
-            {/* <div className="grow-[2]"> */}
             <div>
               <Map />
             </div>
           </div>
-          <div>
+          <div className="basis-[calc(7/12*100%)] max-w-[calc(7/12*100%)]">
             <Card>
               <Algorithm />
             </Card>
@@ -39,6 +36,7 @@ export const MainPage = () => {
             href="https://www.linkedin.com/in/mayur-chawda/"
             target="_blank"
             className="relative after:absolute after:border-[2px] after:border-b-0 after:left-0 after:right-0 after:-bottom-1 after:border-blue-800 after:border-dashed"
+            rel="noreferrer"
           >
             Mayur Chawda
           </a>
