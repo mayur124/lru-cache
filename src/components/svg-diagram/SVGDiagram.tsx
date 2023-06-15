@@ -1,35 +1,32 @@
-import { useSpringRef, useTransition, animated } from "@react-spring/web";
-import { FC, useEffect, useRef, useState } from "react";
-import { SVG_CONSTANTS as C } from "./constants";
+import { animated, useSpringRef, useTransition } from "@react-spring/web";
+import { useEffect, useState } from "react";
+import { shallow } from "zustand/shallow";
+import { SVG_CONSTANTS as C } from "../../helpers/constants";
+import { propCompareFunction } from "../../helpers/utils";
+import { useAlgoStore } from "../../store/algo-store";
 import { Arrows, EndNode, HeadNode, Rectangle } from "./Shapes";
-import { OPERATIONS, TSvgDiagram, TSvgNodeItem } from "./svg-diagram.type";
+import { DIAGRAM_OPERATIONS } from "./svg-diagram.type";
 
-const nodeList: TSvgNodeItem[] = [
-  {
-    id: crypto.randomUUID(),
-    isHeadNode: true,
-    key: "H",
-    value: "H",
-    address: "H",
-    x: 70,
-  },
-  {
-    id: crypto.randomUUID(),
-    isEndNode: true,
-    key: "E",
-    value: "E",
-    address: "E",
-    x: 190,
-  },
-];
-
-export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
+export const SVGDiagram = () => {
   const [zoomX, setZoomX] = useState((C.RECTANGLE_SIZE + C.ARROW_WIDTH) * 2);
-  const [svgNodes, setSvgNodes] = useState<TSvgNodeItem[]>(nodeList);
-  const [showArrows, setShowArrows] = useState(true);
-  const operation = useRef<OPERATIONS | null>(null);
-  const targetValue = useRef<number | null>(null);
-  const newValueRef = useRef(10);
+
+  const { operation, key, showArrows, svgNodes } = useAlgoStore((state) => {
+    const { diagramState } = state;
+    return {
+      operation: diagramState.diagramOperation,
+      key: diagramState.key,
+      value: diagramState.value,
+      address: diagramState.address,
+      showArrows: diagramState.showArrows,
+      svgNodes: diagramState.nodeList,
+    };
+  }, propCompareFunction);
+
+  const { setArrowState } = useAlgoStore((state) => {
+    return {
+      setArrowState: state.diagramActions.setArrowState,
+    };
+  }, shallow);
 
   const transRef = useSpringRef();
   const transitions = useTransition(svgNodes, {
@@ -47,47 +44,6 @@ export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
     },
   });
 
-  const addNewNode = (node: TSvgNodeItem) => {
-    setSvgNodes((nodes) => {
-      nodes = [nodes[0], node, ...nodes.slice(1)];
-      for (let index = 1; index < nodes.length; index++) {
-        nodes[index].x = nodes[index - 1].x + C.RECTANGLE_SIZE + C.ARROW_WIDTH;
-      }
-      return nodes;
-    });
-  };
-
-  const removeNode = () => {
-    setSvgNodes((nodes) => {
-      nodes.splice(nodes.length - 2, 1);
-      for (let index = 1; index < nodes.length; index++) {
-        nodes[index].x = nodes[index - 1].x + C.RECTANGLE_SIZE + C.ARROW_WIDTH;
-      }
-      return [...nodes];
-    });
-  };
-
-  const moveNodeAfterHead = () => {
-    setSvgNodes((nodes) => {
-      const targetNodeIndex = nodes.findIndex(
-        (node) => +node.value === targetValue.current
-      );
-      const nodeToSwap = nodes[targetNodeIndex];
-      nodes.splice(targetNodeIndex, 1);
-      nodes.splice(1, 0, nodeToSwap);
-      for (let index = 1; index < nodes.length; index++) {
-        nodes[index].x = nodes[index - 1].x + C.RECTANGLE_SIZE + C.ARROW_WIDTH;
-      }
-      return [...nodes];
-    });
-  };
-
-  const replaceValue = () => {
-    setSvgNodes((nodes) => {
-      return [...nodes];
-    });
-  };
-
   useEffect(() => {
     setZoomX(
       svgNodes.reduce(
@@ -99,116 +55,59 @@ export const SVGDiagram: FC<TSvgDiagram> = ({ node }) => {
       ) - 8
     );
     transRef.start();
-  }, [svgNodes, transRef]);
-
-  useEffect(() => {
-    if (showArrows) {
-      switch (operation.current) {
-        case OPERATIONS.ADD:
-          addNewNode({
-            id: crypto.randomUUID(),
-            address: "0x00a",
-            key: 1,
-            value: newValueRef.current++,
-            x: 0,
-          });
-          break;
-        case OPERATIONS.REMOVE:
-          removeNode();
-          break;
-        case OPERATIONS.MOVE_AFTER_HEAD:
-          moveNodeAfterHead();
-          break;
-        case OPERATIONS.REPLACE:
-          replaceValue();
-          break;
-      }
-    }
-  }, [showArrows]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [svgNodes]);
 
   return (
-    <>
-      <div className="h-[calc(120/16*1rem)] mt-3 mb-2">
-        <svg viewBox={`42 0 ${zoomX} 100`} className="h-full w-full m-auto">
-          <>
-            {transitions((style, node, _) => {
-              return node.isHeadNode ? (
-                <animated.g style={style}>
-                  <HeadNode />
-                </animated.g>
-              ) : node.isEndNode ? (
-                <animated.g style={style}>
-                  <EndNode xPostion={node.x} />
-                </animated.g>
-              ) : (
-                <animated.g style={style}>
-                  <Rectangle
-                    address={node.address}
-                    text={node.value}
-                    xPostion={node.x}
-                  />
-                </animated.g>
-              );
-            })}
-            {svgNodes.map((node, index) =>
-              node.isHeadNode ? null : (
-                <Arrows
-                  key={node.id}
-                  // prettier-ignore
-                  showArrows={
-                    (operation.current === OPERATIONS.ADD && index === 1) ||
-                    (
-                      operation.current === OPERATIONS.REMOVE &&
-                      (index === svgNodes.length - 2 || index === svgNodes.length - 1)
-                    ) ||
-                    (
-                      operation.current === OPERATIONS.MOVE_AFTER_HEAD &&
-                      (
-                        node.value === targetValue.current || 
-                        index === 1 || index === 2 || index === (svgNodes.findIndex(n => n.value === targetValue.current) + 1)
-                      )
-                    ) ? showArrows
-                      : true
-                  }
-                  xPostion={index * (C.RECTANGLE_SIZE + C.ARROW_WIDTH)}
-                  onArrowHidden={() => setShowArrows(true)}
+    <div className="h-[calc(120/16*1rem)] mt-3 mb-2">
+      <svg viewBox={`42 0 ${zoomX} 100`} className="h-full w-full m-auto">
+        <>
+          {transitions((style, node, _) => {
+            return node.isHeadNode ? (
+              <animated.g style={style}>
+                <HeadNode />
+              </animated.g>
+            ) : node.isEndNode ? (
+              <animated.g style={style}>
+                <EndNode xPostion={node.x} />
+              </animated.g>
+            ) : (
+              <animated.g style={style}>
+                <Rectangle
+                  address={node.address}
+                  text={node.value}
+                  xPostion={node.x}
                 />
-              )
-            )}
-          </>
-        </svg>
-      </div>
-      {/* <button
-        type="button"
-        className="mt-4"
-        onClick={() => {
-          operation.current = OPERATIONS.ADD;
-          setShowArrows(false);
-        }}
-      >
-        Add Node
-      </button>
-      <button
-        type="button"
-        className="mt-4 ml-2"
-        onClick={() => {
-          operation.current = OPERATIONS.REMOVE;
-          setShowArrows(false);
-        }}
-      >
-        Remove Node
-      </button>
-      <button
-        type="button"
-        className="mt-4 ml-2"
-        onClick={() => {
-          operation.current = OPERATIONS.MOVE_AFTER_HEAD;
-          targetValue.current = 10;
-          setShowArrows(false);
-        }}
-      >
-        Move Node after Head
-      </button> */}
-    </>
+              </animated.g>
+            );
+          })}
+          {svgNodes.map((node, index) =>
+            node.isHeadNode ? null : (
+              <Arrows
+                key={node.id}
+                // prettier-ignore
+                showArrows={
+                  (operation === DIAGRAM_OPERATIONS.ADD && index === 1) ||
+                  (
+                    operation === DIAGRAM_OPERATIONS.REMOVE &&
+                    (index === svgNodes.length - 1 || index === svgNodes.length - 2)
+                  ) ||
+                  (
+                    operation === DIAGRAM_OPERATIONS.MOVE_AFTER_HEAD &&
+                    (
+                      node.key === key ||
+                      index === 1 || index === 2 || index === svgNodes.length - 1 || index === svgNodes.length - 2
+                    )
+                  ) ? showArrows
+                    : true
+                }
+                xPostion={index * (C.RECTANGLE_SIZE + C.ARROW_WIDTH)}
+                onArrowHidden={() => setArrowState(true)}
+              />
+            )
+          )}
+        </>
+      </svg>
+    </div>
   );
 };

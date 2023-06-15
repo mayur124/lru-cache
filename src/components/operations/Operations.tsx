@@ -1,9 +1,22 @@
-import { useState } from "react";
+import { shallow } from "zustand/shallow";
+import { propCompareFunction } from "../../helpers/utils";
+import { useAlgoStore } from "../../store/algo-store";
+import { TAlgo } from "../../store/algo-store.type";
 import { Card, CardHeader } from "../common";
-import { getNodeAddress } from "../../helpers/address-generator";
 
 export const Operations = () => {
-  const [operation, setOperation] = useState<"put" | "get">("put");
+  const { algoStatus, algo } = useAlgoStore((state) => {
+    return {
+      algoStatus: state.algoState.status,
+      algo: state.operationFormState.activeAlgo,
+    };
+  }, propCompareFunction);
+  const { onFormSubmit, onAlgoChange } = useAlgoStore((state) => {
+    return {
+      onFormSubmit: state.operationFormActions.onFormSubmit,
+      onAlgoChange: state.operationFormActions.onAlgoChange,
+    };
+  }, shallow);
   return (
     <Card>
       <CardHeader>Operations</CardHeader>
@@ -11,13 +24,10 @@ export const Operations = () => {
         className="p-1.5 [&_label]:inline-block [&_label]:text-xs [&_label]:text-gray-600 [&_input]:px-1.5 [&_input]:outline-gray-300 [&_input]:outline-offset-3 [&_input]:border [&_input]:w-full [&_input]:rounded [&_select]:outline-gray-300 [&_select]:outline-offset-3"
         onSubmit={(e) => {
           e.preventDefault();
-          // const formData = {
-          //   algo: (e.currentTarget.elements as any)["operation"].value,
-          //   key: (e.currentTarget.elements as any)["key"].value,
-          //   value: (e.currentTarget.elements as any)["value"].value,
-          //   address: getNodeAddress(),
-          // };
-          // onFormSubmit(formData);
+          if (algoStatus === "running") return;
+          const key = (e.currentTarget.elements as any)["key"].value,
+            value = (e.currentTarget.elements as any)["value"].value;
+          onFormSubmit(+key, +value);
           e.currentTarget.reset();
         }}
       >
@@ -27,8 +37,8 @@ export const Operations = () => {
             id="operation"
             name="operation"
             className="w-full appearance-none cursor-pointer pl-1.5 border capitalize rounded"
-            value={operation}
-            onChange={(e) => setOperation(e.target.value as "put" | "get")}
+            value={algo}
+            onChange={(e) => onAlgoChange(e.target.value as TAlgo)}
           >
             <option value="put">put</option>
             <option value="get">get</option>
@@ -39,7 +49,7 @@ export const Operations = () => {
             <label htmlFor="key">Key</label>
             <input type="number" id="key" name="key" required />
           </div>
-          {operation === "put" ? (
+          {algo === "put" ? (
             <div>
               <label htmlFor="value">Value</label>
               <input
@@ -54,7 +64,10 @@ export const Operations = () => {
           ) : null}
         </div>
         <div className="mt-2 text-center">
-          <button className="text-sm tracking-wide px-3 py-0.5 rounded bg-[hsl(211deg,70%,36%)] text-white">
+          <button
+            className="text-sm tracking-wide px-3 py-0.5 rounded bg-[hsl(211deg,70%,36%)] text-white disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={algoStatus === "running"}
+          >
             Go
           </button>
         </div>

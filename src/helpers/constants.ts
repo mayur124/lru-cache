@@ -3,7 +3,7 @@ export enum COLORS {
   RECTANGLE_BG = "hsl(220deg, 14.29%, 95.88%)",
   RECTANGLE_SHADOW = "hsl(0deg, 10%, 80%)",
   CONNECTOR_BG = "hsl(211deg, 70%, 26%)",
-  DARK_STROKE = "hsl(0deg 0% 60%)"
+  DARK_STROKE = "hsl(0deg 0% 60%)",
 }
 
 export enum SVG_CONSTANTS {
@@ -14,3 +14,5 @@ export enum SVG_CONSTANTS {
   BOTTOM_CONNECTOR_Y = 35,
   ANCHOR_BUFFER = 8,
 }
+
+export const CACHE_SIZE = 3;

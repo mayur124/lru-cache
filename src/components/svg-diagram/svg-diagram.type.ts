@@ -2,14 +2,10 @@ export type TSvgNodeItem = {
   id: string;
   isHeadNode?: boolean;
   isEndNode?: boolean;
-  key: string | number;
+  key: number;
   value: string | number;
   address: string;
   x: number;
-};
-
-export type TSvgDiagram = {
-  node?: TSvgNodeItem;
 };
 
 export type TXPosition = {
@@ -35,9 +31,9 @@ export type TRectangle = TXPosition &
 
 export type TConnector = TXPosition & TYPosition;
 
-export enum OPERATIONS {
+export enum DIAGRAM_OPERATIONS {
   ADD = "add",
   MOVE_AFTER_HEAD = "move_after_head",
   REMOVE = "remove",
-  REPLACE = "replace",
+  UPDATE_VALUE = "update_value",
 }

@@ -7,3 +7,7 @@ body,
 #root {
   @apply h-full;
 }
+*::selection {
+  @apply bg-[hsl(220deg,14%,70%)];
+  @apply text-white;
+}

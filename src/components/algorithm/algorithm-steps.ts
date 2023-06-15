@@ -8,6 +8,7 @@ export const putAlgo: TAlgoStep[] = [
     subSteps: [
       { id: 1.1, text: "Update the node value", isStepDecisionMaker: false },
       { id: 1.2, text: "Put the node after head", isStepDecisionMaker: false },
+      { id: 1.3, text: "Update the Map", isStepDecisionMaker: false },
     ],
   },
   {
@@ -26,7 +27,7 @@ export const putAlgo: TAlgoStep[] = [
   {
     id: 3,
     text: "Else",
-    isStepDecisionMaker: true,
+    isStepDecisionMaker: false,
     subSteps: [
       {
         id: 3.1,

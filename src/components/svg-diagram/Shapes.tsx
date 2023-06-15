@@ -1,7 +1,7 @@
 import { animated, useSpring } from "@react-spring/web";
 import { FC, useEffect } from "react";
 
-import { COLORS, SVG_CONSTANTS as C } from "./constants";
+import { COLORS, SVG_CONSTANTS as C } from "../../helpers/constants";
 import {
   TArrowAnimations,
   TConnector,
@@ -96,7 +96,7 @@ export const Arrows: FC<TXPosition & Partial<TArrowAnimations>> = ({
         },
       });
     }
-  }, [showArrows]);
+  }, [arrowApi, onArrowHidden, showArrows]);
 
   return (
     <g>
