@@ -313,6 +313,6 @@ export const useAlgoStore = create(
         },
       },
     }),
-    // { enabled: false }
+    { enabled: import.meta.env.DEV ? true : false }
   )
 );
