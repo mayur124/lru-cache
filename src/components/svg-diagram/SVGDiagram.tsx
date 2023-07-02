@@ -85,9 +85,8 @@ export const SVGDiagram = () => {
               </animated.g>
             );
           })}
-          {svgNodes.map((node, index) => {
-            console.log({ operation, index });
-            return node.isHeadNode ? null : (
+          {svgNodes.map((node, index) =>
+            node.isHeadNode ? null : (
               <Arrows
                 key={node.id}
                 // prettier-ignore
@@ -109,8 +108,8 @@ export const SVGDiagram = () => {
                 xPostion={index * (C.RECTANGLE_SIZE + C.ARROW_WIDTH)}
                 onArrowHidden={() => setArrowState(true)}
               />
-            );
-          })}
+            )
+          )}
         </>
       </svg>
     </div>
