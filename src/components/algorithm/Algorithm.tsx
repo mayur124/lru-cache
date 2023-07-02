@@ -67,9 +67,7 @@ export const Algorithm = () => {
     if (activeAlgo === "put") {
       switch (activeStep) {
         case 1: {
-          setTimeout(() => {
-            changeStep(map.get(nodeKey!) ? 1.1 : 2);
-          }, 1000);
+          setTimeout(() => changeStep(map.get(nodeKey!) ? 1.1 : 2), 1000);
           break;
         }
         case 1.1:
@@ -137,14 +135,26 @@ export const Algorithm = () => {
     } else {
       switch (activeStep) {
         case 1:
+          setTimeout(() => changeStep(map.get(nodeKey!) ? 1.1 : 2), 1000);
           break;
         case 1.1:
+          setArrowState(false);
+          setDiagramOperation(DIAGRAM_OPERATIONS.REMOVE_TARGET_NODE);
+          removeTargetNode();
+          setTimeout(() => {
+            setDiagramOperation(DIAGRAM_OPERATIONS.ADD);
+            addNewNode();
+            setTimeout(() => changeStep(1.2), 1000);
+          }, 1000);
           break;
         case 1.2:
+          setTimeout(() => changeStep(0), 1000);
           break;
         case 2:
+          setTimeout(() => changeStep(2.1), 1000);
           break;
         case 2.1:
+          setTimeout(() => changeStep(0), 1000);
           break;
         default:
           break;

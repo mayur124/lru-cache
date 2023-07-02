@@ -113,6 +113,10 @@ export const useAlgoStore = create(
                   activeStep: 1,
                   status: "running",
                 },
+                diagramState: {
+                  ...state.diagramState,
+                  key,
+                }
               };
             }
           });

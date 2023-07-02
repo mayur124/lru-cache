@@ -26,8 +26,8 @@ export const Operations = () => {
         onSubmit={(e) => {
           e.preventDefault();
           if (algoStatus === "running") return;
-          const key = (e.currentTarget.elements as any)["key"].value,
-            value = (e.currentTarget.elements as any)["value"].value;
+          const key = (e.currentTarget.elements as any)["key"].value;
+          const value = (e.currentTarget.elements as any)?.["value"]?.value;
           onFormSubmit(+key, +value);
           e.currentTarget.reset();
         }}
