@@ -1,5 +1,5 @@
+import isEqual from "lodash.isequal";
 import { shallow } from "zustand/shallow";
-import { propCompareFunction } from "../../helpers/utils";
 import { useAlgoStore } from "../../store/algo-store";
 import { TAlgo } from "../../store/algo-store.type";
 import { Card, CardHeader } from "../common";
@@ -10,13 +10,14 @@ export const Operations = () => {
       algoStatus: state.algoState.status,
       algo: state.operationFormState.activeAlgo,
     };
-  }, propCompareFunction);
+  }, isEqual);
   const { onFormSubmit, onAlgoChange } = useAlgoStore((state) => {
     return {
       onFormSubmit: state.operationFormActions.onFormSubmit,
       onAlgoChange: state.operationFormActions.onAlgoChange,
     };
   }, shallow);
+
   return (
     <Card>
       <CardHeader>Operations</CardHeader>

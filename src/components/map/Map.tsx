@@ -1,16 +1,16 @@
+import isEqual from "lodash.isequal";
 import { useEffect, useState } from "react";
-import { propCompareFunction } from "../../helpers/utils";
+import { CACHE_SIZE } from "../../helpers/constants";
 import { useAlgoStore } from "../../store/algo-store";
 import { TMapItem } from "../../store/algo-store.type";
 import { Card, CardHeader } from "../common";
-import { CACHE_SIZE } from "../../helpers/constants";
 
 export const Map = () => {
   const { map } = useAlgoStore((state) => {
     return {
       map: state.mapState.map,
     };
-  }, propCompareFunction);
+  }, isEqual);
   const [mapArr, setMapArray] = useState<TMapItem[]>([]);
 
   useEffect(() => {

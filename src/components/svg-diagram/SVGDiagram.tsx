@@ -1,8 +1,8 @@
 import { animated, useSpringRef, useTransition } from "@react-spring/web";
+import isEqual from "lodash.isequal";
 import { useEffect, useState } from "react";
 import { shallow } from "zustand/shallow";
 import { SVG_CONSTANTS as C } from "../../helpers/constants";
-import { propCompareFunction } from "../../helpers/utils";
 import { useAlgoStore } from "../../store/algo-store";
 import { Arrows, EndNode, HeadNode, Rectangle } from "./Shapes";
 import { DIAGRAM_OPERATIONS } from "./svg-diagram.type";
@@ -10,17 +10,21 @@ import { DIAGRAM_OPERATIONS } from "./svg-diagram.type";
 export const SVGDiagram = () => {
   const [zoomX, setZoomX] = useState((C.RECTANGLE_SIZE + C.ARROW_WIDTH) * 2);
 
-  const { operation, key, showArrows, svgNodes } = useAlgoStore((state) => {
-    const { diagramState } = state;
-    return {
-      operation: diagramState.diagramOperation,
-      key: diagramState.key,
-      value: diagramState.value,
-      address: diagramState.address,
-      showArrows: diagramState.showArrows,
-      svgNodes: diagramState.nodeList,
-    };
-  }, propCompareFunction);
+  const { operation, showArrows, svgNodes, targetNodeIndex } = useAlgoStore(
+    (state) => {
+      const { diagramState } = state;
+      return {
+        operation: diagramState.diagramOperation,
+        key: diagramState.key,
+        value: diagramState.value,
+        address: diagramState.address,
+        showArrows: diagramState.showArrows,
+        svgNodes: diagramState.nodeList,
+        targetNodeIndex: diagramState.moveNodeMeta?.targetIndex,
+      };
+    },
+    isEqual
+  );
 
   const { setArrowState } = useAlgoStore((state) => {
     return {
@@ -81,31 +85,32 @@ export const SVGDiagram = () => {
               </animated.g>
             );
           })}
-          {svgNodes.map((node, index) =>
-            node.isHeadNode ? null : (
+          {svgNodes.map((node, index) => {
+            console.log({ operation, index });
+            return node.isHeadNode ? null : (
               <Arrows
                 key={node.id}
                 // prettier-ignore
                 showArrows={
-                  (operation === DIAGRAM_OPERATIONS.ADD && index === 1) ||
+                  (operation === DIAGRAM_OPERATIONS.ADD && index === 1) || 
                   (
                     operation === DIAGRAM_OPERATIONS.REMOVE &&
                     (index === svgNodes.length - 1 || index === svgNodes.length - 2)
                   ) ||
                   (
-                    operation === DIAGRAM_OPERATIONS.MOVE_AFTER_HEAD &&
-                    (
-                      node.key === key ||
-                      index === 1 || index === 2 || index === svgNodes.length - 1 || index === svgNodes.length - 2
-                    )
-                  ) ? showArrows
-                    : true
+                    operation === DIAGRAM_OPERATIONS.REMOVE_TARGET_NODE &&
+                    index <= targetNodeIndex!
+                  ) || 
+                  (
+                    operation === DIAGRAM_OPERATIONS.UPDATE_VALUE && 
+                    index === targetNodeIndex
+                  ) ? showArrows : true
                 }
                 xPostion={index * (C.RECTANGLE_SIZE + C.ARROW_WIDTH)}
                 onArrowHidden={() => setArrowState(true)}
               />
-            )
-          )}
+            );
+          })}
         </>
       </svg>
     </div>

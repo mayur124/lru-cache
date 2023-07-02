@@ -33,7 +33,7 @@ export type TConnector = TXPosition & TYPosition;
 
 export enum DIAGRAM_OPERATIONS {
   ADD = "add",
-  MOVE_AFTER_HEAD = "move_after_head",
+  REMOVE_TARGET_NODE = "remove_target_node",
   REMOVE = "remove",
   UPDATE_VALUE = "update_value",
 }

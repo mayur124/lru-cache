@@ -1,7 +1,7 @@
+import isEqual from "lodash.isequal";
 import { FC, Fragment, useEffect } from "react";
 import { shallow } from "zustand/shallow";
 import { CACHE_SIZE } from "../../helpers/constants";
-import { propCompareFunction } from "../../helpers/utils";
 import { useAlgoStore } from "../../store/algo-store";
 import { TMapState } from "../../store/algo-store.type";
 import { isStepConditionFulfilled } from "../../store/helper";
@@ -29,12 +29,12 @@ export const Algorithm = () => {
       nodeKey: state.diagramState.key,
       nodeValue: state.diagramState.value,
     };
-  }, propCompareFunction);
+  }, isEqual);
 
   const {
     addNewNode,
-    removeNode,
-    moveNodeAfterHead,
+    removeNodeBeforeEnd,
+    removeTargetNode,
     updateValue,
     changeStep,
     updateMap,
@@ -43,8 +43,8 @@ export const Algorithm = () => {
   } = useAlgoStore((state) => {
     const {
       addNewNode,
-      removeNode,
-      moveNodeAfterHead,
+      removeNodeBeforeEnd,
+      removeTargetNode,
       updateValue,
       setDiagramOperation,
       setArrowState,
@@ -53,8 +53,8 @@ export const Algorithm = () => {
     const { updateMap } = state.mapActions;
     return {
       addNewNode,
-      removeNode,
-      moveNodeAfterHead,
+      removeNodeBeforeEnd,
+      removeTargetNode,
       updateValue,
       changeStep,
       updateMap,
@@ -74,30 +74,33 @@ export const Algorithm = () => {
         }
         case 1.1:
           setDiagramOperation(DIAGRAM_OPERATIONS.UPDATE_VALUE);
-          setArrowState(false);
           updateValue();
           setTimeout(() => changeStep(1.2), 1000);
           break;
         case 1.2:
-          setDiagramOperation(DIAGRAM_OPERATIONS.MOVE_AFTER_HEAD);
           setArrowState(false);
-          moveNodeAfterHead();
-          setTimeout(() => changeStep(1.3), 2000);
+          setDiagramOperation(DIAGRAM_OPERATIONS.REMOVE_TARGET_NODE);
+          removeTargetNode();
+          setTimeout(() => {
+            setDiagramOperation(DIAGRAM_OPERATIONS.ADD);
+            addNewNode();
+            setTimeout(() => changeStep(1.3), 1000);
+          }, 1000);
           break;
         case 1.3:
           updateMap();
           setTimeout(() => changeStep(0), 1000);
           break;
         case 2:
-          setTimeout(() => {
-            changeStep(map.size < CACHE_SIZE ? 2.1 : 3);
-          }, 1000);
+          setTimeout(() => changeStep(map.size < CACHE_SIZE ? 2.1 : 3), 1000);
           break;
         case 2.1:
-          setDiagramOperation(DIAGRAM_OPERATIONS.ADD);
           setArrowState(false);
-          addNewNode();
-          setTimeout(() => changeStep(2.2), 1000);
+          setDiagramOperation(DIAGRAM_OPERATIONS.ADD);
+          setTimeout(() => {
+            addNewNode();
+            changeStep(2.2);
+          }, 1000);
           break;
         case 2.2:
           updateMap();
@@ -109,8 +112,10 @@ export const Algorithm = () => {
         case 3.1:
           setDiagramOperation(DIAGRAM_OPERATIONS.REMOVE);
           setArrowState(false);
-          removeNode();
-          setTimeout(() => changeStep(3.2), 1000);
+          setTimeout(() => {
+            removeNodeBeforeEnd();
+            changeStep(3.2);
+          }, 1000);
           break;
         case 3.2:
           updateMap();

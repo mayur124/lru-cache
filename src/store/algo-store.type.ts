@@ -41,15 +41,18 @@ type TDiagramState = {
   key: TSvgNodeItem["key"] | null;
   value: TSvgNodeItem["value"] | null;
   address: TSvgNodeItem["address"] | null;
-  lastNodeKey: TSvgNodeItem["key"] | null;
+  lastNodeKey: TSvgNodeItem["key"] | null; // reference to remove entry from the map
   nodeList: TSvgNodeItem[];
   showArrows: boolean;
+  moveNodeMeta?: {
+    targetIndex: number;
+  }
 };
 type TDiagramApi = {
   addNewNode: () => void;
-  moveNodeAfterHead: () => void;
+  removeTargetNode: () => void;
   setDiagramOperation: (operation: DIAGRAM_OPERATIONS) => void;
-  removeNode: () => void;
+  removeNodeBeforeEnd: () => void;
   updateValue: () => void;
   updateNodesX: () => void;
   setArrowState: (flag: TDiagramState["showArrows"]) => void;
