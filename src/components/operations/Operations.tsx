@@ -37,7 +37,7 @@ export const Operations = () => {
           <select
             id="operation"
             name="operation"
-            className="w-full appearance-none cursor-pointer pl-1.5 border capitalize rounded"
+            className="w-full appearance-none cursor-pointer pl-1.5 border capitalize rounded bg-white"
             value={algo}
             onChange={(e) => onAlgoChange(e.target.value as TAlgo)}
           >
@@ -48,7 +48,7 @@ export const Operations = () => {
         <div className="flex flex-wrap -mx-1 [&>div]:mx-1 [&>div]:mt-0.5 [&>div]:flex-[1_1_calc((132_-_6_-_8)/16*1rem)]">
           <div>
             <label htmlFor="key">Key</label>
-            <input type="number" id="key" name="key" required />
+            <input type="number" id="key" name="key" required max={10} />
           </div>
           {algo === "put" ? (
             <div>

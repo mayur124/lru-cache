@@ -56,7 +56,8 @@ export const getAlgo: TAlgoStep[] = [
         text: "Put the Node after Head node",
         isStepDecisionMaker: false,
       },
-      { id: 1.2, text: "Return node value", isStepDecisionMaker: false },
+      { id: 1.2, text: "Update the Map", isStepDecisionMaker: false },
+      { id: 1.3, text: "Return node value", isStepDecisionMaker: false },
     ],
   },
   {

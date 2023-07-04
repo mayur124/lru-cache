@@ -205,7 +205,7 @@ export const HeadNode: FC = () => (
 export const EndNode: FC<TEndNode> = ({ xPostion }) => {
   return (
     <>
-      <Rectangle text="E" xPostion={xPostion} />
+      <Rectangle text="T" xPostion={xPostion} />
       <path
         fill="none"
         stroke={COLORS.STROKE}

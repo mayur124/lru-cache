@@ -52,7 +52,7 @@ export const SVGDiagram = () => {
     setZoomX(
       svgNodes.reduce(
         (prev, curr) =>
-          !curr.isHeadNode || !curr.isEndNode
+          !curr.isHeadNode || !curr.isTailNode
             ? (prev += C.RECTANGLE_SIZE + C.ARROW_WIDTH)
             : prev,
         0
@@ -63,15 +63,15 @@ export const SVGDiagram = () => {
   }, [svgNodes]);
 
   return (
-    <div className="h-[calc(120/16*1rem)] mt-3 mb-2">
-      <svg viewBox={`42 0 ${zoomX} 100`} className="h-full w-full m-auto">
+    <div className="h-[calc(100/16*1rem)] mt-3 mb-2">
+      <svg viewBox={`42 0 ${zoomX} 80`} className="h-full w-full m-auto">
         <>
           {transitions((style, node, _) => {
             return node.isHeadNode ? (
               <animated.g style={style}>
                 <HeadNode />
               </animated.g>
-            ) : node.isEndNode ? (
+            ) : node.isTailNode ? (
               <animated.g style={style}>
                 <EndNode xPostion={node.x} />
               </animated.g>
@@ -98,7 +98,7 @@ export const SVGDiagram = () => {
                   ) ||
                   (
                     operation === DIAGRAM_OPERATIONS.REMOVE_TARGET_NODE &&
-                    index <= targetNodeIndex!
+                    index <= targetNodeIndex! + 1
                   ) || 
                   (
                     operation === DIAGRAM_OPERATIONS.UPDATE_VALUE && 

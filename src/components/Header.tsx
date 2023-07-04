@@ -1,16 +1,14 @@
 export const Header = () => (
   <header className="relative mb-2 pb-2 border-b flex">
-    <h1 className="basis-[calc(9/12*100%)] max-w-[calc(9/12*100%)] relative font-bold tracking-wide text-2xl grow whitespace-nowrap">
-      <span className="relative cursor-help after:absolute after:border-[2px] after:border-b-0 after:left-0 after:right-0 after:bottom-0 after:border-blue-800 after:border-dashed before:content-['Least_Recently_Used'] before:absolute before:origin-top-left before:scale-0 hover:before:scale-100 before:rounded before:font-normal before:whitespace-nowrap before:mt-1 before:px-2 before:py-0.5 before:bg-slate-100 before:border before:border-slate-300 before:left-0 before:top-full before:text-xs before:h-6 before:transition-transform before:duration-300 before:will-change-transform before:tracking-wide before:shadow-md">
-        LRU
-      </span>{" "}
-      Cache Visualizer
+    <h1 className="basis-[calc(9/12*100%)] max-w-[calc(9/12*100%)] relative font-bold tracking-wide text-2xl grow whitespace-nowrap text-ellipsis overflow-hidden">
+      LRU Cache Visualizer
     </h1>
     <div className="flex items-center basis-[calc(3/12*100%)] max-w-[calc(3/12*100%)] justify-end gap-6">
       <a
         href="https://youtu.be/xDEuM5qa0zg"
         className="h-6 w-h-6"
         target="_blank"
+        rel="noreferrer"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -32,6 +30,7 @@ export const Header = () => (
         href="https://github.com/mayur124/lru-cache"
         className="h-6 w-h-6"
         target="_blank"
+        rel="noreferrer"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

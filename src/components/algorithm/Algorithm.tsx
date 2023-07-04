@@ -1,9 +1,9 @@
 import isEqual from "lodash.isequal";
-import { FC, Fragment, useEffect } from "react";
+import { FC, Fragment, useEffect, useRef } from "react";
 import { shallow } from "zustand/shallow";
 import { CACHE_SIZE } from "../../helpers/constants";
 import { useAlgoStore } from "../../store/algo-store";
-import { TMapState } from "../../store/algo-store.type";
+import { TAlgoStoreState, TMapState } from "../../store/algo-store.type";
 import { isStepConditionFulfilled } from "../../store/helper";
 import { CardHeader } from "../common";
 import {
@@ -13,23 +13,31 @@ import {
 import { getAlgo, putAlgo } from "./algorithm-steps";
 import { TAlgoComponent, TAlgoStep } from "./algorithm.type";
 
-type TAlgoList = Pick<TAlgoComponent, "activeStep" | "activeAlgo"> & {
+type TAlgoList = TAlgoComponent & {
   algoSteps: TAlgoStep[];
+  algoStatus: TAlgoStoreState["algoState"]["status"];
   level?: number;
   map: TMapState["map"];
   nodeKey: TSvgNodeItem["key"] | null;
 };
 
+const getStepId = (activeStep: number) =>
+  `step-${activeStep}`.replace(/\./g, "-");
+
 export const Algorithm = () => {
-  const { activeAlgo, activeStep, map, nodeKey } = useAlgoStore((state) => {
-    return {
-      activeStep: state.algoState.activeStep,
-      activeAlgo: state.operationFormState.activeAlgo,
-      map: state.mapState.map,
-      nodeKey: state.diagramState.key,
-      nodeValue: state.diagramState.value,
-    };
-  }, isEqual);
+  const { activeAlgo, activeStep, algoStatus, map, nodeKey } = useAlgoStore(
+    (state) => {
+      return {
+        activeStep: state.algoState.activeStep,
+        activeAlgo: state.operationFormState.activeAlgo,
+        algoStatus: state.algoState.status,
+        map: state.mapState.map,
+        nodeKey: state.diagramState.key,
+        nodeValue: state.diagramState.value,
+      };
+    },
+    isEqual
+  );
 
   const {
     addNewNode,
@@ -41,14 +49,8 @@ export const Algorithm = () => {
     setDiagramOperation,
     setArrowState,
   } = useAlgoStore((state) => {
-    const {
-      addNewNode,
-      removeNodeBeforeEnd,
-      removeTargetNode,
-      updateValue,
-      setDiagramOperation,
-      setArrowState,
-    } = state.diagramActions;
+    // prettier-ignore
+    const { addNewNode, removeNodeBeforeEnd, removeTargetNode, updateValue, setDiagramOperation, setArrowState, } = state.diagramActions;
     const { changeStep } = state.algoActions;
     const { updateMap } = state.mapActions;
     return {
@@ -63,6 +65,8 @@ export const Algorithm = () => {
     };
   }, shallow);
 
+  const olRef = useRef<HTMLOListElement>(null);
+
   useEffect(() => {
     if (activeAlgo === "put") {
       switch (activeStep) {
@@ -76,13 +80,16 @@ export const Algorithm = () => {
           setTimeout(() => changeStep(1.2), 1000);
           break;
         case 1.2:
-          setArrowState(false);
           setDiagramOperation(DIAGRAM_OPERATIONS.REMOVE_TARGET_NODE);
-          removeTargetNode();
+          setArrowState(false);
           setTimeout(() => {
-            setDiagramOperation(DIAGRAM_OPERATIONS.ADD);
-            addNewNode();
-            setTimeout(() => changeStep(1.3), 1000);
+            removeTargetNode();
+            setTimeout(() => {
+              setArrowState(false);
+              setDiagramOperation(DIAGRAM_OPERATIONS.ADD);
+              addNewNode();
+              changeStep(1.3);
+            }, 1000);
           }, 1000);
           break;
         case 1.3:
@@ -123,7 +130,9 @@ export const Algorithm = () => {
           setDiagramOperation(DIAGRAM_OPERATIONS.ADD);
           setArrowState(false);
           addNewNode();
-          setTimeout(() => changeStep(3.4), 1000);
+          setTimeout(() => {
+            changeStep(3.4);
+          }, 1000);
           break;
         case 3.4:
           updateMap();
@@ -138,16 +147,23 @@ export const Algorithm = () => {
           setTimeout(() => changeStep(map.get(nodeKey!) ? 1.1 : 2), 1000);
           break;
         case 1.1:
-          setArrowState(false);
           setDiagramOperation(DIAGRAM_OPERATIONS.REMOVE_TARGET_NODE);
-          removeTargetNode();
+          setArrowState(false);
           setTimeout(() => {
-            setDiagramOperation(DIAGRAM_OPERATIONS.ADD);
-            addNewNode();
-            setTimeout(() => changeStep(1.2), 1000);
+            removeTargetNode();
+            setTimeout(() => {
+              setArrowState(false);
+              setDiagramOperation(DIAGRAM_OPERATIONS.ADD);
+              addNewNode();
+              changeStep(1.2);
+            }, 1000);
           }, 1000);
           break;
         case 1.2:
+          updateMap();
+          setTimeout(() => changeStep(1.3), 1000);
+          break;
+        case 1.3:
           setTimeout(() => changeStep(0), 1000);
           break;
         case 2:
@@ -163,13 +179,40 @@ export const Algorithm = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeAlgo, activeStep]);
 
+  useEffect(() => {
+    if (olRef.current) {
+      document.body.scrollTo(0, 0);
+      if (activeStep === 0) {
+        olRef.current.scrollTo(0, 0);
+      } else {
+        const targetLi = olRef.current.querySelector(
+          "#" + getStepId(activeStep)
+        );
+        if (targetLi) {
+          const top = targetLi.getBoundingClientRect().top;
+          if (activeStep === 1) {
+            setTimeout(() => {
+              olRef.current!.scrollTo(0, top - 8);
+            }, 1000);
+          } else {
+            olRef.current!.scrollTo(0, top - 8);
+          }
+        }
+      }
+    }
+  }, [activeStep]);
+
   return (
     <>
       <CardHeader>Algorithm</CardHeader>
-      <ol className="pb-2 max-h-[max(100vh-16.875rem-8px,390px)] overflow-auto">
+      <ol
+        ref={olRef}
+        className="pb-2 max-h-[calc(100vh-12px-41px-8px-1px-8px-100px-12px-8px-16px-8px-33px-85px)] overflow-auto scroll-smooth"
+      >
         <AlgoList
           activeStep={activeStep}
           activeAlgo="put"
+          algoStatus={algoStatus}
           algoSteps={activeAlgo === "put" ? putAlgo : getAlgo}
           map={map}
           nodeKey={nodeKey}
@@ -181,6 +224,7 @@ export const Algorithm = () => {
 
 const AlgoList: FC<TAlgoList> = ({
   algoSteps,
+  algoStatus,
   activeStep,
   activeAlgo,
   map,
@@ -192,6 +236,7 @@ const AlgoList: FC<TAlgoList> = ({
       {algoSteps.map((step) => (
         <Fragment key={step.id}>
           <li
+            id={getStepId(step.id)}
             className={`list-inside text-sm transition-colors duration-500 ${
               level === 1
                 ? "font-medium py-2 list-[square]"
@@ -215,6 +260,7 @@ const AlgoList: FC<TAlgoList> = ({
             <AlgoList
               activeStep={activeStep}
               algoSteps={step.subSteps}
+              algoStatus={algoStatus}
               level={level + 1}
               activeAlgo={activeAlgo}
               map={map}

@@ -40,7 +40,7 @@ export const useAlgoStore = create(
           },
           {
             id: crypto.randomUUID(),
-            isEndNode: true,
+            isTailNode: true,
             key: 0,
             value: "E",
             address: "E",
@@ -87,8 +87,8 @@ export const useAlgoStore = create(
         },
         onFormSubmit(key, value) {
           set((state) => {
+            const existingNode = state.mapState.map.get(key);
             if (state.operationFormState.activeAlgo === "put") {
-              const existingNode = state.mapState.map.get(key);
               return {
                 ...state,
                 algoState: {
@@ -100,9 +100,7 @@ export const useAlgoStore = create(
                   ...state.diagramState,
                   key,
                   value,
-                  address: !existingNode
-                    ? getNodeAddress()
-                    : existingNode.address,
+                  address: getNodeAddress(),
                 },
               };
             } else {
@@ -116,7 +114,14 @@ export const useAlgoStore = create(
                 diagramState: {
                   ...state.diagramState,
                   key,
-                }
+                  value: existingNode?.value ? +existingNode.value : null,
+                  moveNodeMeta: {
+                    targetIndex: state.diagramState.nodeList.findIndex(
+                      (node) => node.key === key
+                    ),
+                  },
+                  address: getNodeAddress(),
+                },
               };
             }
           });
@@ -126,7 +131,7 @@ export const useAlgoStore = create(
         updateMap() {
           set((state) => {
             // prettier-ignore
-            const { key, value, lastNodeKey, diagramOperation } = state.diagramState;
+            const { key, value, address, lastNodeKey, diagramOperation } = state.diagramState;
             const mapClone = structuredClone(state.mapState.map);
             const existingItem = mapClone.get(key!);
             switch (diagramOperation) {
@@ -147,7 +152,8 @@ export const useAlgoStore = create(
                 if (existingItem) {
                   mapClone.set(key!, {
                     value: +value!,
-                    address: existingItem.address,
+                    // address: existingItem.address,
+                    address: address!,
                   });
                   return {
                     ...state,
@@ -160,16 +166,15 @@ export const useAlgoStore = create(
                 break;
               }
               default: {
-                const address = state.diagramState.address!;
                 mapClone.set(key!, {
                   value: +value!,
-                  address,
+                  address: address!,
                 });
                 return {
                   ...state,
                   diagramState: {
                     ...state.diagramState,
-                    address,
+                    // address,
                     value,
                   },
                   mapState: {
@@ -264,7 +269,7 @@ export const useAlgoStore = create(
         },
         removeTargetNode() {
           set((state) => {
-            const { key } = state.diagramState;
+            const { key, address } = state.diagramState;
             const targetNodeIndex = state.diagramState.nodeList.findIndex(
               (node) => +node.key === key
             );
@@ -275,7 +280,7 @@ export const useAlgoStore = create(
               ...state,
               diagramState: {
                 ...state.diagramState,
-                address: nodeToSwap.address,
+                address: address!,
                 key: nodeToSwap.key,
                 value: nodeToSwap.value,
                 nodeList: [...state.diagramState.nodeList],

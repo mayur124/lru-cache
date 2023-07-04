@@ -1,7 +1,7 @@
 export type TSvgNodeItem = {
   id: string;
   isHeadNode?: boolean;
-  isEndNode?: boolean;
+  isTailNode?: boolean;
   key: number;
   value: string | number;
   address: string;
