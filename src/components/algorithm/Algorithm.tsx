@@ -181,7 +181,7 @@ export const Algorithm = () => {
 
   useEffect(() => {
     if (olRef.current) {
-      document.body.scrollTo(0, 0);
+      document.querySelector("html")!.scrollTo(0, 0);
       if (activeStep === 0) {
         olRef.current.scrollTo(0, 0);
       } else {
@@ -192,10 +192,10 @@ export const Algorithm = () => {
           const top = targetLi.getBoundingClientRect().top;
           if (activeStep === 1) {
             setTimeout(() => {
-              olRef.current!.scrollTo(0, top - 8);
+              olRef.current!.scrollTo(0, top);
             }, 1000);
           } else {
-            olRef.current!.scrollTo(0, top - 8);
+            olRef.current!.scrollTo(0, top);
           }
         }
       }
@@ -207,7 +207,7 @@ export const Algorithm = () => {
       <CardHeader>Algorithm</CardHeader>
       <ol
         ref={olRef}
-        className="pb-2 max-h-[calc(100vh-12px-41px-8px-1px-8px-100px-12px-8px-16px-8px-33px-85px)] overflow-auto scroll-smooth"
+        className="pb-2 max-h-[calc(100vh-12px-41px-8px-1px-8px-100px-12px-8px-16px-8px-33px)] overflow-auto scroll-smooth"
       >
         <AlgoList
           activeStep={activeStep}

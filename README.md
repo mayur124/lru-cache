@@ -2,6 +2,7 @@
 
 This is my attempt to create a visualizer of LRU (Least Recently Used) Cache. I gained knowledge about LRU Cache from a comprehensive video tutorial by [Raj Vikramaditya](https://www.youtube.com/@takeUforward), which can be found [here](https://youtu.be/xDEuM5qa0zg).
 
+You can watch it in action [here](https://lrucache.netlify.app)
 <br />
 
 ## Overview
