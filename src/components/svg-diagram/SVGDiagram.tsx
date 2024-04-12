@@ -91,19 +91,16 @@ export const SVGDiagram = () => {
                 key={node.id}
                 // prettier-ignore
                 showArrows={
-                  (operation === DIAGRAM_OPERATIONS.ADD && index === 1) || 
+                  (operation === DIAGRAM_OPERATIONS.ADD && index === 1) ||
                   (
                     operation === DIAGRAM_OPERATIONS.REMOVE &&
                     (index === svgNodes.length - 1 || index === svgNodes.length - 2)
                   ) ||
                   (
                     operation === DIAGRAM_OPERATIONS.REMOVE_TARGET_NODE &&
-                    index <= targetNodeIndex! + 1
-                  ) || 
-                  (
-                    operation === DIAGRAM_OPERATIONS.UPDATE_VALUE && 
-                    index === targetNodeIndex
-                  ) ? showArrows : true
+                    (index === targetNodeIndex! + 1 || index === targetNodeIndex)
+                  )
+                  ? showArrows : true
                 }
                 xPostion={index * (C.RECTANGLE_SIZE + C.ARROW_WIDTH)}
                 onArrowHidden={() => setArrowState(true)}

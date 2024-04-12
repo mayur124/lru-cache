@@ -85,7 +85,6 @@ export const Algorithm = () => {
           setTimeout(() => {
             removeTargetNode();
             setTimeout(() => {
-              setArrowState(false);
               setDiagramOperation(DIAGRAM_OPERATIONS.ADD);
               addNewNode();
               changeStep(1.3);
